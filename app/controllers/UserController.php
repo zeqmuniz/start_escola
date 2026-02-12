@@ -4,13 +4,17 @@ class UserController
 {
     public function index(): void
     {
-        $users = User::all();
+        $users = $this->currentHasRole('secretary') && !$this->currentHasRole('admin')
+            ? User::allByRoleSlug('student')
+            : User::all();
         View::render('users/index', ['users' => $users], 'layouts/app');
     }
 
     public function create(): void
     {
-        $roles = User::rolesOptions();
+        $roles = $this->currentHasRole('secretary') && !$this->currentHasRole('admin')
+            ? User::roleOptionsBySlug(['student'])
+            : User::rolesOptions();
         $people = Person::all();
         View::render('users/create', ['roles' => $roles, 'people' => $people], 'layouts/app');
     }
@@ -54,6 +58,9 @@ class UserController
         }
 
         $roleIds = array_map('intval', (array) $data['roles']);
+        if ($this->currentHasRole('secretary') && !$this->currentHasRole('admin')) {
+            $roleIds = $this->filterRoleIdsBySlug($roleIds, ['student']);
+        }
         User::create([
             'person_id' => $data['person_id'],
             'display_name' => $data['display_name'],
@@ -75,7 +82,13 @@ class UserController
         if (!$user) {
             Response::abort(404, 'Usuario nao encontrado.');
         }
+        if ($this->currentHasRole('secretary') && !$this->currentHasRole('admin') && !$this->userHasRole($user, 'student')) {
+            Response::abort(403, 'Acesso negado.');
+        }
         $roles = User::rolesOptions();
+        if ($this->currentHasRole('secretary') && !$this->currentHasRole('admin')) {
+            $roles = User::roleOptionsBySlug(['student']);
+        }
         $people = Person::all();
         View::render('users/edit', [
             'user' => $user,
@@ -90,6 +103,10 @@ class UserController
         $user = User::find($id);
         if (!$user) {
             Response::abort(404, 'Usuario nao encontrado.');
+        }
+        $userWithRoles = User::findWithRoles($id);
+        if ($userWithRoles && $this->currentHasRole('secretary') && !$this->currentHasRole('admin') && !$this->userHasRole($userWithRoles, 'student')) {
+            Response::abort(403, 'Acesso negado.');
         }
 
         $data = [
@@ -134,6 +151,9 @@ class UserController
         }
 
         $roleIds = array_map('intval', (array) $data['roles']);
+        if ($this->currentHasRole('secretary') && !$this->currentHasRole('admin')) {
+            $roleIds = $this->filterRoleIdsBySlug($roleIds, ['student']);
+        }
         User::update($id, $payload, $roleIds);
         $current = Auth::user();
         if ($current && (int) $current['id'] === $id) {
@@ -159,6 +179,9 @@ class UserController
         $target = User::findWithRoles($id);
         if (!$target) {
             Response::abort(404, 'Usuario nao encontrado.');
+        }
+        if ($this->currentHasRole('secretary') && !$this->currentHasRole('admin') && !$this->userHasRole($target, 'student')) {
+            Response::abort(403, 'Acesso negado.');
         }
 
         if ($this->currentHasRole('secretary') && $this->userHasRole($target, 'admin')) {
@@ -232,5 +255,15 @@ class UserController
             }
         }
         return false;
+    }
+
+    private function filterRoleIdsBySlug(array $roleIds, array $allowedSlugs): array
+    {
+        if (empty($roleIds)) {
+            return [];
+        }
+        $roles = User::roleOptionsBySlug($allowedSlugs);
+        $allowedIds = array_map(fn($role) => (int) $role['id'], $roles);
+        return array_values(array_intersect($roleIds, $allowedIds));
     }
 }

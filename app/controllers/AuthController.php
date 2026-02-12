@@ -4,7 +4,7 @@ class AuthController
 {
     public function showLogin(): void
     {
-        View::render('auth/login', [], 'layouts/guest');
+        View::render('auth/login', ['loginPage' => true, 'formWide' => true], 'layouts/guest');
     }
 
     public function login(): void

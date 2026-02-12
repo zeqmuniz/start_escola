@@ -6,6 +6,10 @@
         <input type="text" name="name" value="<?= e(old('name', $module['name'] ?? '')) ?>" class="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2" required>
     </div>
     <div>
+        <label class="block text-sm font-medium text-gray-700">Ordem de exibicao</label>
+        <input type="number" name="sort_order" value="<?= e(old('sort_order', $module['sort_order'] ?? '0')) ?>" class="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2" min="0">
+    </div>
+    <div>
         <label class="block text-sm font-medium text-gray-700">Descricao</label>
         <textarea name="description" rows="3" class="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2"><?= e(old('description', $module['description'] ?? '')) ?></textarea>
     </div>

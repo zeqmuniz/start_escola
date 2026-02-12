@@ -1,6 +1,6 @@
 <?php
 
-$router->get('/', [DashboardController::class, 'home'], ['auth' => true]);
+$router->get('/', [PublicController::class, 'home'], ['guest' => true]);
 $router->get('/dashboard', [DashboardController::class, 'index'], ['auth' => true]);
 
 $router->get('/login', [AuthController::class, 'showLogin'], ['guest' => true]);

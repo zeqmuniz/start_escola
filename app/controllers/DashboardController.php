@@ -10,28 +10,46 @@ class DashboardController
     public function index(): void
     {
         $db = App::db();
+        $user = Auth::user();
         $stats = [];
 
-        $stats[] = [
-            'label' => 'Inscricoes pendentes',
-            'value' => RBAC::can('inscriptions.view_any') ? Inscription::pendingCount() : '-',
-            'hint' => 'Pedidos aguardando avaliacao',
-        ];
-        $stats[] = [
-            'label' => 'Pessoas',
-            'value' => RBAC::can('people.view_any') ? (int) ($db->fetch('SELECT COUNT(*) as total FROM people')['total'] ?? 0) : '-',
-            'hint' => 'Cadastros ativos',
-        ];
-        $stats[] = [
-            'label' => 'Usuarios',
-            'value' => RBAC::can('users.view_any') ? (int) ($db->fetch('SELECT COUNT(*) as total FROM users')['total'] ?? 0) : '-',
-            'hint' => 'Acesso ao sistema',
-        ];
-        $stats[] = [
-            'label' => 'Polos',
-            'value' => RBAC::can('poles.view_any') ? (int) ($db->fetch('SELECT COUNT(*) as total FROM poles')['total'] ?? 0) : '-',
-            'hint' => 'Unidades cadastradas',
-        ];
+        if (RBAC::can('inscriptions.view_any')) {
+            $stats[] = [
+                'label' => 'Inscricoes pendentes',
+                'value' => Inscription::pendingCount(),
+                'hint' => 'Pedidos aguardando avaliacao',
+            ];
+        }
+        if (RBAC::can('people.view_any')) {
+            $stats[] = [
+                'label' => 'Pessoas',
+                'value' => (int) ($db->fetch('SELECT COUNT(*) as total FROM people')['total'] ?? 0),
+                'hint' => 'Cadastros ativos',
+            ];
+        }
+        if (RBAC::can('users.view_any')) {
+            $stats[] = [
+                'label' => 'Usuarios',
+                'value' => (int) ($db->fetch('SELECT COUNT(*) as total FROM users')['total'] ?? 0),
+                'hint' => 'Acesso ao sistema',
+            ];
+        }
+        if (RBAC::can('poles.view_any')) {
+            $stats[] = [
+                'label' => 'Polos',
+                'value' => (int) ($db->fetch('SELECT COUNT(*) as total FROM poles')['total'] ?? 0),
+                'hint' => 'Unidades cadastradas',
+            ];
+        }
+
+        if ($user && !$this->currentHasRole('admin') && $this->currentHasRole('coordinator')) {
+            $pole = Pole::findByCoordinator((int) $user['id']);
+            $stats[] = [
+                'label' => 'Seu polo',
+                'value' => $pole ? $pole['name'] : '-',
+                'hint' => $pole ? 'Polo atribuido a voce' : 'Nenhum polo atribuido',
+            ];
+        }
 
         $actions = [];
         if (RBAC::can('inscriptions.view_any')) {
@@ -48,5 +66,16 @@ class DashboardController
             'stats' => $stats,
             'actions' => $actions,
         ], 'layouts/app');
+    }
+
+    private function currentHasRole(string $slug): bool
+    {
+        $roles = Auth::roles();
+        foreach ($roles as $role) {
+            if (($role['slug'] ?? '') === $slug) {
+                return true;
+            }
+        }
+        return false;
     }
 }

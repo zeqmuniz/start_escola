@@ -10,7 +10,8 @@ class PoleController
 
     public function create(): void
     {
-        View::render('poles/create', [], 'layouts/app');
+        $coordinators = User::coordinators();
+        View::render('poles/create', ['coordinators' => $coordinators], 'layouts/app');
     }
 
     public function store(): void
@@ -18,6 +19,7 @@ class PoleController
         $data = [
             'name' => trim((string) Request::input('name')),
             'address' => trim((string) Request::input('address')),
+            'coordinator_user_id' => Request::input('coordinator_user_id') ?: null,
             'status' => Request::input('status') ?: 'active',
         ];
 
@@ -44,7 +46,8 @@ class PoleController
         if (!$pole) {
             Response::abort(404, 'Polo nao encontrado.');
         }
-        View::render('poles/edit', ['pole' => $pole], 'layouts/app');
+        $coordinators = User::coordinators();
+        View::render('poles/edit', ['pole' => $pole, 'coordinators' => $coordinators], 'layouts/app');
     }
 
     public function update(array $params): void
@@ -58,6 +61,7 @@ class PoleController
         $data = [
             'name' => trim((string) Request::input('name')),
             'address' => trim((string) Request::input('address')),
+            'coordinator_user_id' => Request::input('coordinator_user_id') ?: null,
             'status' => Request::input('status') ?: 'active',
         ];
 

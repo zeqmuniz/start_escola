@@ -7,10 +7,20 @@ class InscriptionController
         $modules = Module::all();
         $poles = Pole::all();
         $modalities = Modality::all();
+        $selectedModuleId = Request::input('module_id') ?: null;
+        $lockedModule = null;
+        if ($selectedModuleId) {
+            $lockedModule = Module::find((int) $selectedModuleId);
+            if (!$lockedModule) {
+                $selectedModuleId = null;
+            }
+        }
         View::render('inscriptions/public', [
             'modules' => $modules,
             'poles' => $poles,
             'modalities' => $modalities,
+            'selectedModuleId' => $selectedModuleId,
+            'lockedModule' => $lockedModule,
         ], 'layouts/guest');
     }
 

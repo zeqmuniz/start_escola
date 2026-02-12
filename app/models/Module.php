@@ -5,7 +5,7 @@ class Module
     public static function all(): array
     {
         $db = App::db();
-        return $db->fetchAll('SELECT * FROM modules ORDER BY id DESC');
+        return $db->fetchAll('SELECT * FROM modules ORDER BY sort_order ASC, id ASC');
     }
 
     public static function find(int $id): ?array
@@ -18,9 +18,10 @@ class Module
     {
         $db = App::db();
         $db->execute(
-            'INSERT INTO modules (name, description, created_at) VALUES (:name, :description, NOW())',
+            'INSERT INTO modules (name, sort_order, description, created_at) VALUES (:name, :sort_order, :description, NOW())',
             [
                 'name' => $data['name'],
+                'sort_order' => (int) ($data['sort_order'] ?? 0),
                 'description' => $data['description'] ?? null,
             ]
         );
@@ -31,9 +32,10 @@ class Module
     {
         $db = App::db();
         $db->execute(
-            'UPDATE modules SET name = :name, description = :description, updated_at = NOW() WHERE id = :id',
+            'UPDATE modules SET name = :name, sort_order = :sort_order, description = :description, updated_at = NOW() WHERE id = :id',
             [
                 'name' => $data['name'],
+                'sort_order' => (int) ($data['sort_order'] ?? 0),
                 'description' => $data['description'] ?? null,
                 'id' => $id,
             ]

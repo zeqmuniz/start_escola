@@ -1,7 +1,7 @@
 <?php
 $navItem = function (string $label, string $path, string $icon = '>') {
     $active = is_active($path);
-    $base = 'flex items-center gap-2 px-3 py-2 rounded-xl text-sm transition';
+    $base = 'flex items-center gap-2 px-3 py-2 rounded-xl text-base transition';
     $classes = $active ? $base . ' bg-white text-sidebar font-semibold' : $base . ' text-white/80 hover:text-white hover:bg-sidebarLight';
     echo '<a class="' . $classes . '" href="' . e(url(ltrim($path, '/'))) . '"><span class="text-accent">' . e($icon) . '</span>' . e($label) . '</a>';
 };

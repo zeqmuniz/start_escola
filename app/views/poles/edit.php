@@ -10,6 +10,17 @@
         <input type="text" name="address" value="<?= e(old('address', $pole['address'] ?? '')) ?>" class="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2">
     </div>
     <div>
+        <label class="block text-sm font-medium text-gray-700">Coordenador do polo</label>
+        <select name="coordinator_user_id" class="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2">
+            <option value="">Sem coordenador</option>
+            <?php foreach ($coordinators as $coordinator): ?>
+                <option value="<?= e($coordinator['id']) ?>" <?= (old('coordinator_user_id', $pole['coordinator_user_id'] ?? '') == $coordinator['id']) ? 'selected' : '' ?>>
+                    <?= e($coordinator['display_name'] ?: $coordinator['email']) ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+    </div>
+    <div>
         <label class="block text-sm font-medium text-gray-700">Status</label>
         <select name="status" class="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2">
             <option value="active" <?= (old('status', $pole['status'] ?? '') === 'active') ? 'selected' : '' ?>>Ativo</option>

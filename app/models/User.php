@@ -15,6 +15,21 @@ class User
         );
     }
 
+    public static function allByRoleSlug(string $roleSlug): array
+    {
+        $db = App::db();
+        return $db->fetchAll(
+            'SELECT u.*, GROUP_CONCAT(r.name SEPARATOR ", ") as roles
+             FROM users u
+             INNER JOIN user_roles ur ON ur.user_id = u.id
+             INNER JOIN roles r ON r.id = ur.role_id
+             WHERE r.slug = :slug
+             GROUP BY u.id
+             ORDER BY u.id DESC',
+            ['slug' => $roleSlug]
+        );
+    }
+
     public static function find(int $id): ?array
     {
         $db = App::db();
@@ -106,5 +121,29 @@ class User
     {
         $db = App::db();
         return $db->fetchAll('SELECT id, name, slug FROM roles ORDER BY name');
+    }
+
+    public static function roleOptionsBySlug(array $slugs): array
+    {
+        if (empty($slugs)) {
+            return [];
+        }
+        $db = App::db();
+        $in = implode(',', array_fill(0, count($slugs), '?'));
+        return $db->fetchAll("SELECT id, name, slug FROM roles WHERE slug IN ({$in}) ORDER BY name", $slugs);
+    }
+
+    public static function coordinators(): array
+    {
+        $db = App::db();
+        return $db->fetchAll(
+            'SELECT u.id, u.display_name, u.email
+             FROM users u
+             INNER JOIN user_roles ur ON ur.user_id = u.id
+             INNER JOIN roles r ON r.id = ur.role_id
+             WHERE r.slug = :slug AND u.status = :status
+             ORDER BY u.display_name',
+            ['slug' => 'coordinator', 'status' => 'active']
+        );
     }
 }

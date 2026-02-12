@@ -12,6 +12,7 @@
             <tr class="text-left text-gray-500">
                 <th class="py-2">Nome</th>
                 <th class="py-2">Endereco</th>
+                <th class="py-2">Coordenador</th>
                 <th class="py-2">Status</th>
                 <th class="py-2"></th>
             </tr>
@@ -21,6 +22,7 @@
                 <tr>
                     <td class="py-3 font-medium"><?= e($pole['name']) ?></td>
                     <td class="py-3"><?= e($pole['address'] ?? '-') ?></td>
+                    <td class="py-3"><?= e($pole['coordinator_name'] ?? '-') ?></td>
                     <td class="py-3">
                         <span class="px-2 py-1 rounded-full text-xs font-semibold <?= $pole['status'] === 'active' ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-200 text-gray-700' ?>">
                             <?= e($pole['status']) ?>

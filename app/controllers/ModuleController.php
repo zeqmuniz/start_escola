@@ -17,6 +17,7 @@ class ModuleController
     {
         $data = [
             'name' => trim((string) Request::input('name')),
+            'sort_order' => Request::input('sort_order') ?: 0,
             'description' => trim((string) Request::input('description')),
         ];
 
@@ -56,6 +57,7 @@ class ModuleController
 
         $data = [
             'name' => trim((string) Request::input('name')),
+            'sort_order' => Request::input('sort_order') ?: 0,
             'description' => trim((string) Request::input('description')),
         ];
 
